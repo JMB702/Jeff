@@ -1,6 +1,7 @@
 import { TinderClient } from "./tinder-client";
 import { DB } from "./database";
 import { ConversationEngine } from "./conversation-engine";
+import { ProfileAnalyzer } from "./profile-analyzer";
 import { Notifier } from "./notifier";
 import { AppConfig, MatchState, TinderMatch } from "./types";
 
@@ -8,6 +9,7 @@ export class Bot {
   private tinder: TinderClient;
   private db: DB;
   private ai: ConversationEngine;
+  private profileAnalyzer: ProfileAnalyzer;
   private notifier: Notifier;
   private config: AppConfig;
   private myUserId: string = "";
@@ -19,6 +21,7 @@ export class Bot {
     this.tinder = new TinderClient(authToken);
     this.db = new DB();
     this.ai = new ConversationEngine(config);
+    this.profileAnalyzer = new ProfileAnalyzer();
     this.notifier = new Notifier(config);
   }
 
@@ -88,7 +91,19 @@ export class Bot {
   }
 
   private async handleNewMatch(match: TinderMatch): Promise<void> {
-    const profileSummary = this.tinder.buildProfileSummary(match.person);
+    // Deep-analyze the profile: text + all photos via vision AI
+    let profileSummary: string;
+    try {
+      const analysis = await this.profileAnalyzer.analyzeProfile(match.person);
+      profileSummary = this.profileAnalyzer.formatForProfileSummary(match.person, analysis);
+    } catch (err: any) {
+      // Fallback to basic text-only summary if vision analysis fails
+      this.notifier.emit({
+        type: "error",
+        message: `Photo analysis failed for ${match.person.name}, using text-only: ${err.message}`,
+      });
+      profileSummary = this.tinder.buildProfileSummary(match.person);
+    }
 
     const state: Partial<MatchState> & { match_id: string } = {
       match_id: match._id,
@@ -104,7 +119,7 @@ export class Bot {
     this.db.upsertMatch(state);
     this.notifier.emit({ type: "new_match", match, state: state as MatchState });
 
-    // Generate and send opener
+    // Generate and send opener (now powered by the rich profile analysis)
     const matchState = this.db.getMatch(match._id)!;
     await this.sendOpener(matchState);
   }
