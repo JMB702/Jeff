@@ -1,0 +1,35 @@
+{
+  "name": "tinder-auto-messenger",
+  "version": "1.0.0",
+  "description": "Automated Tinder messaging bot with AI-powered conversations and date scheduling",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "bot": "ts-node src/index.ts run",
+    "status": "ts-node src/index.ts status",
+    "matches": "ts-node src/index.ts matches",
+    "config": "ts-node src/index.ts config",
+    "approve-date": "ts-node src/index.ts approve-date",
+    "reject-date": "ts-node src/index.ts reject-date"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "better-sqlite3": "^9.4.0",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "croner": "^8.0.0",
+    "dotenv": "^16.3.0",
+    "openai": "^4.20.0",
+    "ora": "^5.4.1",
+    "table": "^6.8.1",
+    "yaml": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.2"
+  }
+}
