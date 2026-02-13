@@ -199,6 +199,148 @@ program
     db.close();
   });
 
+// --- View profile analysis ---
+program
+  .command("profile <matchId>")
+  .description("View the AI profile analysis for a match")
+  .action((matchId) => {
+    const db = new DB();
+    const match = findMatch(db, matchId);
+    if (!match) {
+      console.error(chalk.red(`Match not found: ${matchId}`));
+      db.close();
+      return;
+    }
+
+    console.log(chalk.bold.underline(`\nProfile Analysis: ${match.name}\n`));
+    console.log(match.profile_summary || chalk.gray("No analysis available."));
+    console.log(`\n${chalk.bold("Status:")} ${statusBadge(match.status)}`);
+    console.log(`${chalk.bold("Messages:")} ${match.messages_sent} sent / ${match.messages_received} received`);
+    if (match.date_details) {
+      console.log(`${chalk.bold("Date:")} ${match.date_details}`);
+    }
+    console.log("");
+    db.close();
+  });
+
+// --- Send manual message ---
+program
+  .command("send <matchId> <message>")
+  .description("Manually send a message to a match (overrides bot for this one message)")
+  .action(async (matchId, message) => {
+    const authToken = process.env.TINDER_AUTH_TOKEN;
+    if (!authToken) {
+      console.error(chalk.red("Error: TINDER_AUTH_TOKEN not set"));
+      process.exit(1);
+    }
+
+    const config = loadConfig();
+    const bot = new Bot(config, authToken);
+    const db = bot.getDB();
+    const match = findMatch(db, matchId);
+    if (!match) {
+      console.error(chalk.red(`Match not found: ${matchId}`));
+      return;
+    }
+
+    try {
+      await bot.sendManualMessage(match.match_id, message);
+      console.log(chalk.green(`\nMessage sent to ${match.name}: "${message}"`));
+    } catch (err: any) {
+      console.error(chalk.red(`\nError: ${err.message}`));
+    }
+  });
+
+// --- Live dashboard ---
+program
+  .command("dashboard")
+  .description("Show a live-updating dashboard of all match activity")
+  .option("-r, --refresh <seconds>", "Refresh interval in seconds", "5")
+  .action(async (opts) => {
+    const refreshMs = parseInt(opts.refresh, 10) * 1000;
+
+    const render = () => {
+      const db = new DB();
+      const stats = db.getStats();
+      const allMatches = db.getAllMatches();
+
+      // Clear screen
+      process.stdout.write("\x1B[2J\x1B[0f");
+
+      console.log(chalk.bold.magenta("  TINDER BOT DASHBOARD"));
+      console.log(chalk.gray("  " + new Date().toLocaleString()));
+      console.log(chalk.gray("  Press Ctrl+C to exit\n"));
+
+      // Stats bar
+      console.log(
+        `  ${chalk.cyan.bold(stats.total.toString())} matches  |  ` +
+        `${chalk.blue.bold(stats.messages_sent_total.toString())} messages sent  |  ` +
+        `${chalk.green.bold(stats.dates_confirmed.toString())} dates confirmed`
+      );
+      console.log("");
+
+      // Action required section
+      const pendingDates = allMatches.filter((m) => m.status === "date_pending");
+      if (pendingDates.length > 0) {
+        console.log(chalk.yellowBright.bold("  ACTION REQUIRED:"));
+        for (const m of pendingDates) {
+          console.log(
+            chalk.yellowBright(`    ${m.name} said YES to a date! `) +
+            chalk.gray(`(${m.match_id.slice(0, 12)}...)`)
+          );
+          console.log(chalk.gray(`    Details: ${m.date_details || "See conversation"}`));
+          console.log(chalk.cyan(`    Run: npx ts-node src/index.ts approve-date ${m.match_id}`));
+          console.log("");
+        }
+      }
+
+      // Active conversations
+      const active = allMatches.filter((m) =>
+        ["chatting", "opener_sent", "date_proposed"].includes(m.status)
+      );
+      if (active.length > 0) {
+        console.log(chalk.bold("  Active Conversations:"));
+        const rows = active.map((m) => [
+          "  " + m.name,
+          statusBadge(m.status),
+          `${m.messages_sent}/${m.messages_received}`,
+          m.last_message_at ? timeSince(m.last_message_at) : "-",
+          m.last_message_from === "match" ? chalk.green("Her turn done") : chalk.blue("Waiting..."),
+        ]);
+        const header = ["  Name", "Status", "Msgs", "Last Activity", "Ball In"];
+        console.log(table([header, ...rows]));
+      }
+
+      // Confirmed dates
+      const confirmed = allMatches.filter((m) => m.status === "date_confirmed");
+      if (confirmed.length > 0) {
+        console.log(chalk.green.bold("  Upcoming Dates:"));
+        for (const m of confirmed) {
+          console.log(chalk.green(`    ${m.name}: ${m.date_details || "Details in conversation"}`));
+        }
+        console.log("");
+      }
+
+      // Ghosted / inactive
+      const inactive = allMatches.filter((m) =>
+        ["ghosted", "unmatched", "stopped"].includes(m.status)
+      );
+      if (inactive.length > 0) {
+        console.log(chalk.gray(`  Inactive: ${inactive.length} matches (ghosted/unmatched/stopped)`));
+        console.log("");
+      }
+
+      db.close();
+    };
+
+    render();
+    const interval = setInterval(render, refreshMs);
+    process.on("SIGINT", () => {
+      clearInterval(interval);
+      process.exit(0);
+    });
+  });
+
 // --- Config info ---
 program
   .command("config")
@@ -224,6 +366,17 @@ program
   });
 
 // --- Helpers ---
+
+function findMatch(db: DB, matchId: string) {
+  const direct = db.getMatch(matchId);
+  if (direct) return direct;
+  const all = db.getAllMatches();
+  return all.find(
+    (m) =>
+      m.match_id.startsWith(matchId) ||
+      m.name.toLowerCase() === matchId.toLowerCase()
+  ) || null;
+}
 
 function statusColor(status: string): (s: string) => string {
   const colors: Record<string, (s: string) => string> = {
