@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Media Relink</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <h1>Media Relink</h1>
+            <div class="status-indicators">
+                <span id="nas-status" class="indicator" title="NAS">NAS</span>
+                <span id="claude-status" class="indicator" title="Claude AI">AI</span>
+                <span id="peers-count" class="indicator" title="Network Peers">0 Peers</span>
+            </div>
+        </header>
+
+        <!-- Project Info -->
+        <section id="project-info" class="card">
+            <h2>Project</h2>
+            <div id="project-details">
+                <p class="muted">Open a Premiere Pro project to begin</p>
+            </div>
+        </section>
+
+        <!-- Controls -->
+        <section class="card">
+            <h2>Relink Settings</h2>
+            <div class="controls">
+                <label class="toggle">
+                    <input type="checkbox" id="opt-network" checked>
+                    <span>Search network peers</span>
+                </label>
+                <label class="toggle">
+                    <input type="checkbox" id="opt-claude" checked>
+                    <span>Use Claude AI for edge cases</span>
+                </label>
+                <label class="toggle">
+                    <input type="checkbox" id="opt-nas" checked>
+                    <span>Move found media to NAS</span>
+                </label>
+            </div>
+
+            <div class="button-row">
+                <button id="btn-scan" class="btn btn-secondary">Scan Media</button>
+                <button id="btn-relink" class="btn btn-primary" disabled>Auto Relink</button>
+            </div>
+        </section>
+
+        <!-- Progress -->
+        <section id="progress-section" class="card hidden">
+            <h2>Progress</h2>
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <p id="progress-message" class="progress-message"></p>
+        </section>
+
+        <!-- Results -->
+        <section id="results-section" class="card hidden">
+            <h2>Results</h2>
+            <div class="results-summary" id="results-summary"></div>
+            <div id="results-list" class="results-list"></div>
+            <div class="button-row">
+                <button id="btn-apply" class="btn btn-primary" disabled>Apply Relinks in Premiere</button>
+            </div>
+        </section>
+
+        <!-- NAS Config -->
+        <section class="card collapsible">
+            <h2 class="collapsible-header">NAS Configuration</h2>
+            <div class="collapsible-body">
+                <div class="form-group">
+                    <label>NAS Mount Path</label>
+                    <input type="text" id="nas-path" placeholder="/Volumes/NASMedia">
+                </div>
+                <div class="form-group">
+                    <label>Protocol</label>
+                    <select id="nas-protocol">
+                        <option value="local">Local Mount</option>
+                        <option value="smb">SMB</option>
+                        <option value="sftp">SFTP</option>
+                    </select>
+                </div>
+                <button id="btn-test-nas" class="btn btn-secondary">Test Connection</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- CSInterface for Premiere communication -->
+    <script src="js/CSInterface.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
