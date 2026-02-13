@@ -382,6 +382,21 @@ export class Bot {
     });
   }
 
+  async sendManualMessage(matchId: string, message: string): Promise<void> {
+    const match = this.db.getMatch(matchId);
+    if (!match) throw new Error(`Match ${matchId} not found`);
+
+    await this.tinder.sendMessage(matchId, message);
+    this.db.addMessage(matchId, "assistant", message);
+    this.db.upsertMatch({
+      match_id: matchId,
+      messages_sent: match.messages_sent + 1,
+      last_message_from: "bot",
+      last_message_at: new Date().toISOString(),
+      last_bot_message_at: new Date().toISOString(),
+    });
+  }
+
   async rejectDate(matchId: string): Promise<void> {
     const match = this.db.getMatch(matchId);
     if (!match) throw new Error(`Match ${matchId} not found`);
