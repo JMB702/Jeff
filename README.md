@@ -50,11 +50,27 @@ Edit `config.yaml` to set:
 npm run bot
 ```
 
+### 5. Open the web dashboard
+
+```bash
+npm run web
+```
+
+Then open [http://localhost:3000](http://localhost:3000) in your browser. The dashboard lets you:
+- View all matches and their statuses
+- Read conversation histories
+- Send manual messages
+- Approve or decline dates
+- Stop/resume the bot for specific matches
+- View AI profile analyses
+- See live updates via real-time streaming
+
 ## Commands
 
 | Command | Description |
 |---------|-------------|
 | `npm run bot` | Start the bot |
+| `npm run web` | Open web dashboard at localhost:3000 |
 | `npm run status` | Show statistics (total matches, messages sent, dates confirmed) |
 | `npm run matches` | List all tracked matches with status |
 | `npm run matches -- -s chatting` | Filter matches by status |

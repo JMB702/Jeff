@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { Bot } from "./bot";
 import { DB } from "./database";
 import { loadConfig } from "./config-loader";
+import { startWebServer } from "./web-server";
 
 dotenv.config();
 
@@ -405,5 +406,14 @@ function timeSince(dateStr: string): string {
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
   return `${Math.floor(seconds / 86400)}d ago`;
 }
+
+// --- Web UI ---
+program
+  .command("web")
+  .description("Start the web dashboard")
+  .option("-p, --port <port>", "Port to listen on", "3000")
+  .action((opts) => {
+    startWebServer(parseInt(opts.port, 10));
+  });
 
 program.parse();
