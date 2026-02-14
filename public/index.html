@@ -565,49 +565,65 @@ let allMatches = [];
 let currentFilter = 'all';
 let isKilled = false;
 
-// --- Data fetching ---
+// --- Data fetching (with graceful fallbacks for file:// mode) ---
 async function fetchStats() {
-  const res = await fetch(`${API}/api/stats`);
-  return res.json();
+  try {
+    const res = await fetch(`${API}/api/stats`);
+    return res.json();
+  } catch(e) { return { total: 0, messages_sent_total: 0, dates_confirmed: 0, by_status: {} }; }
 }
 
 async function fetchMatches() {
-  const res = await fetch(`${API}/api/matches`);
-  return res.json();
+  try {
+    const res = await fetch(`${API}/api/matches`);
+    return res.json();
+  } catch(e) { return []; }
 }
 
 async function fetchConversation(matchId) {
-  const res = await fetch(`${API}/api/matches/${matchId}/conversation`);
-  return res.json();
+  try {
+    const res = await fetch(`${API}/api/matches/${matchId}/conversation`);
+    return res.json();
+  } catch(e) { return { match: null, conversation: [] }; }
 }
 
 async function sendMessage(matchId, message) {
-  const res = await fetch(`${API}/api/matches/${matchId}/send`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message })
-  });
-  return res.json();
+  try {
+    const res = await fetch(`${API}/api/matches/${matchId}/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message })
+    });
+    return res.json();
+  } catch(e) { return { success: false }; }
 }
 
 async function approveDate(matchId) {
-  const res = await fetch(`${API}/api/matches/${matchId}/approve-date`, { method: 'POST' });
-  return res.json();
+  try {
+    const res = await fetch(`${API}/api/matches/${matchId}/approve-date`, { method: 'POST' });
+    return res.json();
+  } catch(e) { return { success: false }; }
 }
 
 async function rejectDate(matchId) {
-  const res = await fetch(`${API}/api/matches/${matchId}/reject-date`, { method: 'POST' });
-  return res.json();
+  try {
+    const res = await fetch(`${API}/api/matches/${matchId}/reject-date`, { method: 'POST' });
+    return res.json();
+  } catch(e) { return { success: false }; }
 }
 
 async function stopMatch(matchId) {
-  const res = await fetch(`${API}/api/matches/${matchId}/stop`, { method: 'POST' });
-  return res.json();
+  try {
+    const res = await fetch(`${API}/api/matches/${matchId}/stop`, { method: 'POST' });
+    return res.json();
+  } catch(e) { return { success: false }; }
 }
 
 async function resumeMatch(matchId) {
-  const res = await fetch(`${API}/api/matches/${matchId}/resume`, { method: 'POST' });
-  return res.json();
+  try {
+    const res = await fetch(`${API}/api/matches/${matchId}/resume`, { method: 'POST' });
+    return res.json();
+  } catch(e) { return { success: false }; }
 }
 
 // --- Rendering ---
@@ -831,10 +847,16 @@ async function handleReject(matchId) {
 }
 
 async function handleKillSwitch() {
-  const res = await fetch(`${API}/api/bot/kill`, { method: 'POST' });
-  const data = await res.json();
-  updateKillUI(data.killed);
-  if (data.killed) await refresh();
+  try {
+    const res = await fetch(`${API}/api/bot/kill`, { method: 'POST' });
+    const data = await res.json();
+    updateKillUI(data.killed);
+    if (data.killed) await refresh();
+  } catch(e) {
+    // Toggle locally when no server
+    isKilled = !isKilled;
+    updateKillUI(isKilled);
+  }
 }
 
 function updateKillUI(killed) {
@@ -899,31 +921,35 @@ async function refresh() {
 
 // SSE for live updates
 function connectSSE() {
-  const es = new EventSource(`${API}/api/events`);
-  es.addEventListener('update', (e) => {
-    const data = JSON.parse(e.data);
-    allMatches = data.matches;
-    renderStats(data.stats);
-    renderMatchList(data.matches);
-    if (data.killed !== undefined) updateKillUI(data.killed);
-  });
-  es.addEventListener('kill_switch', (e) => {
-    const data = JSON.parse(e.data);
-    updateKillUI(data.killed);
-    if (data.killed) refresh();
-  });
-  es.onerror = () => {
-    es.close();
-    setTimeout(connectSSE, 5000);
-  };
+  try {
+    const es = new EventSource(`${API}/api/events`);
+    es.addEventListener('update', (e) => {
+      const data = JSON.parse(e.data);
+      allMatches = data.matches;
+      renderStats(data.stats);
+      renderMatchList(data.matches);
+      if (data.killed !== undefined) updateKillUI(data.killed);
+    });
+    es.addEventListener('kill_switch', (e) => {
+      const data = JSON.parse(e.data);
+      updateKillUI(data.killed);
+      if (data.killed) refresh();
+    });
+    es.onerror = () => {
+      es.close();
+      setTimeout(connectSSE, 10000);
+    };
+  } catch(e) { /* SSE not available in file:// mode */ }
 }
 
 // Initial load
 async function init() {
   await refresh();
-  const statusRes = await fetch(`${API}/api/bot/status`);
-  const statusData = await statusRes.json();
-  if (statusData.killed) updateKillUI(true);
+  try {
+    const statusRes = await fetch(`${API}/api/bot/status`);
+    const statusData = await statusRes.json();
+    if (statusData.killed) updateKillUI(true);
+  } catch(e) { /* no server available */ }
   connectSSE();
 }
 init();
