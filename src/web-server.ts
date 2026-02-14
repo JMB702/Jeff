@@ -192,8 +192,18 @@ function findMatch(matchId: string) {
   ) || null;
 }
 
-export function startWebServer(port: number = 3000) {
-  app.listen(port, () => {
+export function startWebServer(port: number = 3001) {
+  const server = app.listen(port, () => {
     console.log(`\nDashboard running at http://localhost:${port}\n`);
+  });
+  server.on("error", (err: NodeJS.ErrnoException) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(`\nError: Port ${port} is already in use!`);
+      console.error(`Another server may already be running. Try:`);
+      console.error(`  1. Kill existing processes: killall node`);
+      console.error(`  2. Or use a different port: npm run web -- -p ${port + 1}\n`);
+      process.exit(1);
+    }
+    throw err;
   });
 }

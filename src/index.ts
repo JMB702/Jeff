@@ -411,7 +411,7 @@ function timeSince(dateStr: string): string {
 program
   .command("web")
   .description("Start the web dashboard")
-  .option("-p, --port <port>", "Port to listen on", "3000")
+  .option("-p, --port <port>", "Port to listen on", "3001")
   .action((opts) => {
     startWebServer(parseInt(opts.port, 10));
   });
