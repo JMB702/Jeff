@@ -318,8 +318,19 @@
   .detail-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
   .detail-actions {
     display: flex;
-    gap: 8px;
+    align-items: center;
+    gap: 12px;
   }
+  .auto-msg-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .auto-msg-toggle .toggle { width: 36px; height: 20px; }
+  .auto-msg-toggle .toggle-slider::before { width: 14px; height: 14px; }
+  .auto-msg-toggle .toggle.active .toggle-slider::before { transform: translateX(16px); }
 
   /* Buttons */
   .btn {
@@ -632,6 +643,13 @@ async function resumeMatch(matchId) {
   } catch(e) { return { success: false }; }
 }
 
+async function toggleAutoMessaging(matchId) {
+  try {
+    const res = await fetch(`${API}/api/matches/${matchId}/auto-messaging`, { method: 'POST' });
+    return res.json();
+  } catch(e) { return { success: false }; }
+}
+
 // --- Rendering ---
 
 function timeSince(dateStr) {
@@ -720,6 +738,12 @@ function renderDetail(match, conversation) {
         </div>
       </div>
       <div class="detail-actions">
+        <div class="auto-msg-toggle">
+          <span>Auto</span>
+          <div class="toggle ${match.auto_messaging ? 'active' : ''}" onclick="handleAutoToggle('${match.match_id}')">
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
         ${isStopped
           ? `<button class="btn btn-success" onclick="handleResume('${match.match_id}')">Resume Bot</button>`
           : `<button class="btn btn-ghost" onclick="handleStop('${match.match_id}')">Stop Bot</button>`
@@ -826,6 +850,13 @@ async function selectMatch(matchId) {
 function switchTab(tab) {
   currentTab = tab;
   if (currentMatchId) selectMatch(currentMatchId);
+}
+
+async function handleAutoToggle(matchId) {
+  await toggleAutoMessaging(matchId);
+  const m = allMatches.find(m => m.match_id === matchId);
+  if (m) m.auto_messaging = !m.auto_messaging;
+  if (currentMatchId === matchId) selectMatch(matchId);
 }
 
 async function handleSend() {
@@ -952,18 +983,7 @@ async function init() {
     renderMatchList([]);
     return;
   }
-  try {
-    const [stats, matches] = await Promise.all([fetchStats(), fetchMatches()]);
-    console.log('API response - stats:', JSON.stringify(stats));
-    console.log('API response - matches:', matches.length, 'profiles');
-    allMatches = matches;
-    renderStats(stats);
-    renderMatchList(matches);
-  } catch(e) {
-    console.error('Init failed:', e);
-    document.getElementById('match-list').innerHTML =
-      '<div class="no-matches" style="color:red">API Error: ' + e.message + '<br>Make sure dev.py is running</div>';
-  }
+  await refresh();
   try {
     const statusRes = await fetch(`${API}/api/bot/status`);
     const statusData = await statusRes.json();
