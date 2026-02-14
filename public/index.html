@@ -171,7 +171,7 @@
   .layout {
     display: flex;
     flex: 1;
-    min-height: 0;
+    height: 0;
     overflow: hidden;
   }
 
@@ -206,9 +206,17 @@
   .filter-btn:hover { border-color: var(--accent); color: var(--text); }
   .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-  .match-list {
+  .match-list-wrap {
     flex: 1;
-    height: 0;
+    position: relative;
+    min-height: 0;
+  }
+  .match-list {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: auto;
@@ -582,7 +590,9 @@
       <button class="filter-btn" data-filter="dates">Dates</button>
       <button class="filter-btn" data-filter="inactive">Inactive</button>
     </div>
-    <div class="match-list" id="match-list"></div>
+    <div class="match-list-wrap">
+      <div class="match-list" id="match-list"></div>
+    </div>
   </div>
 
   <!-- Main -->
