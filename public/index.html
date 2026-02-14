@@ -207,14 +207,13 @@
   .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
   .match-list-wrap {
-    flex: 1;
-    overflow: hidden;
-  }
-  .match-list {
-    overflow-y: scroll;
+    flex: 1 1 0px;
+    min-height: 0;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: auto;
-    max-height: calc(100vh - 175px);
+  }
+  .match-list {
   }
   .match-item {
     padding: 14px 16px;
@@ -1086,22 +1085,7 @@ async function init() {
   }
   connectSSE();
 }
-init().then(function() {
-  requestAnimationFrame(fixMatchListHeight);
-});
-
-// --- Fix match list height (refine after layout settles) ---
-function fixMatchListHeight() {
-  var wrap = document.querySelector('.match-list-wrap');
-  var list = document.getElementById('match-list');
-  if (wrap && list) {
-    var rect = wrap.getBoundingClientRect();
-    if (rect.height > 0) {
-      list.style.maxHeight = rect.height + 'px';
-    }
-  }
-}
-window.addEventListener('resize', fixMatchListHeight);
+init();
 
 // --- Live reload (auto-refreshes browser when dev.py detects file changes) ---
 (function() {
