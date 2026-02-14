@@ -952,7 +952,18 @@ async function init() {
     renderMatchList([]);
     return;
   }
-  await refresh();
+  try {
+    const [stats, matches] = await Promise.all([fetchStats(), fetchMatches()]);
+    console.log('API response - stats:', JSON.stringify(stats));
+    console.log('API response - matches:', matches.length, 'profiles');
+    allMatches = matches;
+    renderStats(stats);
+    renderMatchList(matches);
+  } catch(e) {
+    console.error('Init failed:', e);
+    document.getElementById('match-list').innerHTML =
+      '<div class="no-matches" style="color:red">API Error: ' + e.message + '<br>Make sure dev.py is running</div>';
+  }
   try {
     const statusRes = await fetch(`${API}/api/bot/status`);
     const statusData = await statusRes.json();
