@@ -117,15 +117,18 @@
     color: var(--text);
     text-transform: uppercase;
     letter-spacing: 1px;
+    width: 110px;
+    text-align: right;
   }
   .kill-bar-status {
     font-size: 15px;
     font-weight: 700;
     padding: 4px 14px;
     border-radius: 6px;
-    min-width: 90px;
+    width: 100px;
     text-align: center;
     display: inline-block;
+    box-sizing: border-box;
   }
   .kill-bar-status.on { background: var(--green); color: #000; }
   .kill-bar-status.off { background: var(--red); color: white; }
