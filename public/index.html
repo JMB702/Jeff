@@ -510,7 +510,6 @@
 </head>
 <body>
 
-<div class="killed-banner" id="killed-banner">ALL MESSAGING PAUSED</div>
 <div class="header">
   <h1>Tinder Bot <span style="font-size:12px;font-weight:400;opacity:0.7;margin-left:6px;">Command Center</span></h1>
   <div class="header-stats">
@@ -868,7 +867,6 @@ function updateKillUI(killed) {
   isKilled = killed;
   const toggle = document.getElementById('kill-toggle');
   const barStatus = document.getElementById('kill-bar-status');
-  const banner = document.getElementById('killed-banner');
   if (killed) {
     toggle.classList.remove('active');
     barStatus.textContent = 'STOPPED';
@@ -878,7 +876,6 @@ function updateKillUI(killed) {
     barStatus.textContent = 'ACTIVE';
     barStatus.className = 'kill-bar-status on';
   }
-  banner.classList.toggle('visible', killed);
 }
 
 async function handleStop(matchId) {
