@@ -214,6 +214,7 @@
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: auto;
+    max-height: calc(100vh - 175px);
   }
   .match-item {
     padding: 14px 16px;
@@ -1085,18 +1086,21 @@ async function init() {
   }
   connectSSE();
 }
-init();
+init().then(function() {
+  requestAnimationFrame(fixMatchListHeight);
+});
 
-// --- Fix match list height (bypass flex chain issues) ---
+// --- Fix match list height (refine after layout settles) ---
 function fixMatchListHeight() {
   var wrap = document.querySelector('.match-list-wrap');
   var list = document.getElementById('match-list');
   if (wrap && list) {
     var rect = wrap.getBoundingClientRect();
-    list.style.height = rect.height + 'px';
+    if (rect.height > 0) {
+      list.style.maxHeight = rect.height + 'px';
+    }
   }
 }
-fixMatchListHeight();
 window.addEventListener('resize', fixMatchListHeight);
 
 // --- Live reload (auto-refreshes browser when dev.py detects file changes) ---
