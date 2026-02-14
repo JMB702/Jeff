@@ -532,8 +532,8 @@
 
 <div class="kill-bar">
   <span class="kill-bar-label">Kill Switch</span>
-  <label class="toggle" id="kill-toggle" onclick="handleKillSwitch()">
-    <input type="checkbox" id="kill-checkbox" checked>
+  <label class="toggle" id="kill-toggle">
+    <input type="checkbox" id="kill-checkbox" checked onchange="handleKillSwitch()">
     <span class="toggle-slider"></span>
   </label>
   <span class="kill-bar-status on" id="kill-bar-status">ACTIVE</span>
@@ -850,15 +850,15 @@ async function handleReject(matchId) {
 }
 
 async function handleKillSwitch() {
+  const checkbox = document.getElementById('kill-checkbox');
+  const nowKilled = !checkbox.checked;
   try {
     const res = await fetch(`${API}/api/bot/kill`, { method: 'POST' });
     const data = await res.json();
     updateKillUI(data.killed);
     if (data.killed) await refresh();
   } catch(e) {
-    // Toggle locally when no server
-    isKilled = !isKilled;
-    updateKillUI(isKilled);
+    updateKillUI(nowKilled);
   }
 }
 
