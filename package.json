@@ -13,7 +13,7 @@
     "config": "ts-node src/index.ts config",
     "approve-date": "ts-node src/index.ts approve-date",
     "reject-date": "ts-node src/index.ts reject-date",
-    "web": "tsc && node dist/index.js web -p 3001"
+    "web": "node serve.js"
   },
   "dependencies": {
     "axios": "^1.6.0",
