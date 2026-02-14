@@ -72,11 +72,10 @@
     height: 26px;
     cursor: pointer;
   }
-  .toggle input { display: none; }
   .toggle-slider {
     position: absolute;
     inset: 0;
-    background: rgba(255,255,255,0.3);
+    background: var(--red);
     border-radius: 13px;
     transition: all 0.3s;
   }
@@ -91,10 +90,10 @@
     left: 3px;
     transition: all 0.3s;
   }
-  .toggle input:checked + .toggle-slider {
+  .toggle.active .toggle-slider {
     background: var(--green);
   }
-  .toggle input:checked + .toggle-slider::before {
+  .toggle.active .toggle-slider::before {
     transform: translateX(22px);
   }
   .kill-status {
@@ -532,10 +531,9 @@
 
 <div class="kill-bar">
   <span class="kill-bar-label">Kill Switch</span>
-  <label class="toggle" id="kill-toggle">
-    <input type="checkbox" id="kill-checkbox" checked onchange="handleKillSwitch()">
+  <div class="toggle active" id="kill-toggle" onclick="handleKillSwitch()">
     <span class="toggle-slider"></span>
-  </label>
+  </div>
   <span class="kill-bar-status on" id="kill-bar-status">ACTIVE</span>
 </div>
 
@@ -850,8 +848,7 @@ async function handleReject(matchId) {
 }
 
 async function handleKillSwitch() {
-  const checkbox = document.getElementById('kill-checkbox');
-  const nowKilled = !checkbox.checked;
+  const nowKilled = !isKilled;
   try {
     const res = await fetch(`${API}/api/bot/kill`, { method: 'POST' });
     const data = await res.json();
@@ -864,14 +861,15 @@ async function handleKillSwitch() {
 
 function updateKillUI(killed) {
   isKilled = killed;
-  const checkbox = document.getElementById('kill-checkbox');
+  const toggle = document.getElementById('kill-toggle');
   const barStatus = document.getElementById('kill-bar-status');
   const banner = document.getElementById('killed-banner');
-  checkbox.checked = !killed;
   if (killed) {
+    toggle.classList.remove('active');
     barStatus.textContent = 'STOPPED';
     barStatus.className = 'kill-bar-status off';
   } else {
+    toggle.classList.add('active');
     barStatus.textContent = 'ACTIVE';
     barStatus.className = 'kill-bar-status on';
   }
