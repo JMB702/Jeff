@@ -532,7 +532,10 @@
 
 <div class="kill-bar">
   <span class="kill-bar-label">Kill Switch</span>
-  <button class="btn btn-danger" id="kill-btn" onclick="handleKillSwitch()" style="font-size:15px;padding:10px 24px;">STOP ALL MESSAGING</button>
+  <label class="toggle" id="kill-toggle" onclick="handleKillSwitch()">
+    <input type="checkbox" id="kill-checkbox" checked>
+    <span class="toggle-slider"></span>
+  </label>
   <span class="kill-bar-status on" id="kill-bar-status">ACTIVE</span>
 </div>
 
@@ -861,19 +864,14 @@ async function handleKillSwitch() {
 
 function updateKillUI(killed) {
   isKilled = killed;
-  const btn = document.getElementById('kill-btn');
+  const checkbox = document.getElementById('kill-checkbox');
   const barStatus = document.getElementById('kill-bar-status');
   const banner = document.getElementById('killed-banner');
+  checkbox.checked = !killed;
   if (killed) {
-    btn.textContent = 'RESUME MESSAGING';
-    btn.className = 'btn btn-success';
-    btn.style.cssText = 'font-size:15px;padding:10px 24px;';
     barStatus.textContent = 'STOPPED';
     barStatus.className = 'kill-bar-status off';
   } else {
-    btn.textContent = 'STOP ALL MESSAGING';
-    btn.className = 'btn btn-danger';
-    btn.style.cssText = 'font-size:15px;padding:10px 24px;';
     barStatus.textContent = 'ACTIVE';
     barStatus.className = 'kill-bar-status on';
   }
