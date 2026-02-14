@@ -105,30 +105,39 @@
   .kill-bar {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: 14px 32px;
+    padding: 14px 0;
+    position: relative;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 16px;
   }
   .kill-bar-label {
+    position: absolute;
+    right: calc(50% + 40px);
     font-size: 15px;
     font-weight: 700;
     color: var(--text);
     text-transform: uppercase;
     letter-spacing: 1px;
-    width: 110px;
-    text-align: right;
+    white-space: nowrap;
+  }
+  .kill-bar .toggle {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
   .kill-bar-status {
+    position: absolute;
+    left: calc(50% + 40px);
     font-size: 15px;
     font-weight: 700;
     padding: 4px 14px;
     border-radius: 6px;
     width: 100px;
     text-align: center;
-    display: inline-block;
     box-sizing: border-box;
+    white-space: nowrap;
   }
   .kill-bar-status.on { background: var(--green); color: #000; }
   .kill-bar-status.off { background: var(--red); color: white; }
