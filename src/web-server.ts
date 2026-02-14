@@ -32,7 +32,8 @@ setInterval(() => {
   if (sseClients.length > 0) {
     const stats = db.getStats();
     const matches = db.getAllMatches();
-    broadcast("update", { stats, matches });
+    const killed = db.getState("kill_switch") === "true";
+    broadcast("update", { stats, matches, killed });
   }
 }, 3000);
 
@@ -151,7 +152,27 @@ app.get("/api/config", (_req: Request, res: Response) => {
 });
 
 app.get("/api/bot/status", (_req: Request, res: Response) => {
-  res.json({ running: botRunning });
+  const killed = db.getState("kill_switch") === "true";
+  res.json({ running: botRunning, killed });
+});
+
+app.post("/api/bot/kill", (_req: Request, res: Response) => {
+  const current = db.getState("kill_switch") === "true";
+  const newState = !current;
+  db.setState("kill_switch", String(newState));
+
+  // When kill switch is ON, stop all active matches
+  if (newState) {
+    const active = db.getAllMatches().filter(m =>
+      ["new", "opener_sent", "chatting", "date_proposed"].includes(m.status)
+    );
+    for (const m of active) {
+      db.upsertMatch({ match_id: m.match_id, status: "stopped" });
+    }
+  }
+
+  broadcast("kill_switch", { killed: newState });
+  res.json({ killed: newState });
 });
 
 // --- Serve frontend ---

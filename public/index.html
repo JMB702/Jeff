@@ -46,6 +46,74 @@
     color: white;
     letter-spacing: -0.5px;
   }
+  .header-center {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .kill-switch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.25);
+    padding: 8px 16px;
+    border-radius: 24px;
+  }
+  .kill-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .toggle {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    cursor: pointer;
+  }
+  .toggle input { display: none; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.3);
+    border-radius: 13px;
+    transition: all 0.3s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: all 0.3s;
+  }
+  .toggle input:checked + .toggle-slider {
+    background: var(--green);
+  }
+  .toggle input:checked + .toggle-slider::before {
+    transform: translateX(22px);
+  }
+  .kill-status {
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    min-width: 28px;
+  }
+  .killed-banner {
+    background: rgba(255,68,68,0.9);
+    color: white;
+    text-align: center;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: none;
+  }
+  .killed-banner.visible { display: block; }
   .header-stats {
     display: flex;
     gap: 24px;
@@ -419,8 +487,19 @@
 </head>
 <body>
 
+<div class="killed-banner" id="killed-banner">ALL MESSAGING PAUSED</div>
 <div class="header">
   <h1>Tinder Bot</h1>
+  <div class="header-center">
+    <div class="kill-switch">
+      <span class="kill-label">Bot</span>
+      <label class="toggle">
+        <input type="checkbox" id="kill-toggle" checked onchange="handleKillSwitch()">
+        <span class="toggle-slider"></span>
+      </label>
+      <span class="kill-status" id="kill-status">ON</span>
+    </div>
+  </div>
   <div class="header-stats">
     <div class="header-stat">
       <div class="num" id="stat-total">-</div>
@@ -464,6 +543,7 @@ let currentMatchId = null;
 let currentTab = 'conversation';
 let allMatches = [];
 let currentFilter = 'all';
+let isKilled = false;
 
 // --- Data fetching ---
 async function fetchStats() {
@@ -730,6 +810,24 @@ async function handleReject(matchId) {
   selectMatch(matchId);
 }
 
+async function handleKillSwitch() {
+  const res = await fetch(`${API}/api/bot/kill`, { method: 'POST' });
+  const data = await res.json();
+  updateKillUI(data.killed);
+  if (data.killed) await refresh();
+}
+
+function updateKillUI(killed) {
+  isKilled = killed;
+  const toggle = document.getElementById('kill-toggle');
+  const status = document.getElementById('kill-status');
+  const banner = document.getElementById('killed-banner');
+  toggle.checked = !killed;
+  status.textContent = killed ? 'OFF' : 'ON';
+  status.style.color = killed ? '#ff4444' : 'white';
+  banner.classList.toggle('visible', killed);
+}
+
 async function handleStop(matchId) {
   await stopMatch(matchId);
   await refresh();
@@ -777,6 +875,12 @@ function connectSSE() {
     allMatches = data.matches;
     renderStats(data.stats);
     renderMatchList(data.matches);
+    if (data.killed !== undefined) updateKillUI(data.killed);
+  });
+  es.addEventListener('kill_switch', (e) => {
+    const data = JSON.parse(e.data);
+    updateKillUI(data.killed);
+    if (data.killed) refresh();
   });
   es.onerror = () => {
     es.close();
@@ -785,9 +889,14 @@ function connectSSE() {
 }
 
 // Initial load
-refresh().then(() => {
+async function init() {
+  await refresh();
+  const statusRes = await fetch(`${API}/api/bot/status`);
+  const statusData = await statusRes.json();
+  if (statusData.killed) updateKillUI(true);
   connectSSE();
-});
+}
+init();
 </script>
 </body>
 </html>
