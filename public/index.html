@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tinder Bot Dashboard</title>
+<title>Tinder Bot Dashboard v2</title>
 <style>
   :root {
     --bg: #0a0a0f;
@@ -103,6 +103,30 @@
     color: white;
     min-width: 28px;
   }
+  .kill-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  .kill-bar-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .kill-bar-status {
+    font-size: 15px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 6px;
+  }
+  .kill-bar-status.on { background: var(--green); color: #000; }
+  .kill-bar-status.off { background: var(--red); color: white; }
   .killed-banner {
     background: rgba(255,68,68,0.9);
     color: white;
@@ -490,16 +514,6 @@
 <div class="killed-banner" id="killed-banner">ALL MESSAGING PAUSED</div>
 <div class="header">
   <h1>Tinder Bot</h1>
-  <div class="header-center">
-    <div class="kill-switch">
-      <span class="kill-label">Bot</span>
-      <label class="toggle">
-        <input type="checkbox" id="kill-toggle" checked onchange="handleKillSwitch()">
-        <span class="toggle-slider"></span>
-      </label>
-      <span class="kill-status" id="kill-status">ON</span>
-    </div>
-  </div>
   <div class="header-stats">
     <div class="header-stat">
       <div class="num" id="stat-total">-</div>
@@ -514,6 +528,12 @@
       <div class="label">Dates</div>
     </div>
   </div>
+</div>
+
+<div class="kill-bar">
+  <span class="kill-bar-label">Kill Switch</span>
+  <button class="btn btn-danger" id="kill-btn" onclick="handleKillSwitch()" style="font-size:15px;padding:10px 24px;">STOP ALL MESSAGING</button>
+  <span class="kill-bar-status on" id="kill-bar-status">ACTIVE</span>
 </div>
 
 <div class="layout">
@@ -819,12 +839,22 @@ async function handleKillSwitch() {
 
 function updateKillUI(killed) {
   isKilled = killed;
-  const toggle = document.getElementById('kill-toggle');
-  const status = document.getElementById('kill-status');
+  const btn = document.getElementById('kill-btn');
+  const barStatus = document.getElementById('kill-bar-status');
   const banner = document.getElementById('killed-banner');
-  toggle.checked = !killed;
-  status.textContent = killed ? 'OFF' : 'ON';
-  status.style.color = killed ? '#ff4444' : 'white';
+  if (killed) {
+    btn.textContent = 'RESUME MESSAGING';
+    btn.className = 'btn btn-success';
+    btn.style.cssText = 'font-size:15px;padding:10px 24px;';
+    barStatus.textContent = 'STOPPED';
+    barStatus.className = 'kill-bar-status off';
+  } else {
+    btn.textContent = 'STOP ALL MESSAGING';
+    btn.className = 'btn btn-danger';
+    btn.style.cssText = 'font-size:15px;padding:10px 24px;';
+    barStatus.textContent = 'ACTIVE';
+    barStatus.className = 'kill-bar-status on';
+  }
   banner.classList.toggle('visible', killed);
 }
 
