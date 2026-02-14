@@ -283,13 +283,17 @@ def get_demo_stats():
 
 # ─── Server ────────────────────────────────────────────────────────
 
+SERVER_ID = str(time.time())  # changes on every restart
+
+
 def get_file_hash():
-    """Get hash of index.html to detect changes."""
+    """Get hash of index.html + server identity to detect changes and restarts."""
     try:
         with open(os.path.join(PUBLIC_DIR, 'index.html'), 'rb') as f:
-            return hashlib.md5(f.read()).hexdigest()
+            content_hash = hashlib.md5(f.read()).hexdigest()
+        return content_hash + SERVER_ID
     except Exception:
-        return None
+        return SERVER_ID
 
 
 def git_pull_loop():
