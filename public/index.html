@@ -207,7 +207,10 @@
 
   .match-list {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: auto;
+    min-height: 0;
   }
   .match-item {
     padding: 14px 16px;
@@ -388,7 +391,9 @@
   /* Conversation view */
   .conversation {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: auto;
     padding: 24px;
     display: flex;
     flex-direction: column;
@@ -823,9 +828,11 @@ function renderTab(match, conversation) {
       </div>
     `;
 
-    // Scroll to bottom
-    const scroll = document.getElementById('convo-scroll');
-    if (scroll) scroll.scrollTop = scroll.scrollHeight;
+    // Scroll to bottom — wait for layout to finish
+    requestAnimationFrame(function() {
+      const scroll = document.getElementById('convo-scroll');
+      if (scroll) scroll.scrollTop = scroll.scrollHeight;
+    });
 
   } else if (currentTab === 'profile') {
     container.innerHTML = `
