@@ -959,6 +959,17 @@ async function init() {
   connectSSE();
 }
 init();
+
+// --- Live reload (auto-refreshes browser when dev.py detects file changes) ---
+(function() {
+  var lastHash = null;
+  setInterval(function() {
+    fetch('/__hash').then(function(r) { return r.json(); }).then(function(d) {
+      if (lastHash && lastHash !== d.h) location.reload();
+      lastHash = d.h;
+    }).catch(function() {});
+  }, 2000);
+})();
 </script>
 </body>
 </html>
