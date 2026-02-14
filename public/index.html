@@ -105,31 +105,22 @@
   .kill-bar {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: 14px 0;
-    position: relative;
-    height: 26px;
-    display: flex;
+    padding: 14px 32px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: center;
+    gap: 16px;
   }
   .kill-bar-label {
-    position: absolute;
-    right: calc(50% + 40px);
+    justify-self: end;
     font-size: 15px;
     font-weight: 700;
     color: var(--text);
     text-transform: uppercase;
     letter-spacing: 1px;
-    white-space: nowrap;
-  }
-  .kill-bar .toggle {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
   }
   .kill-bar-status {
-    position: absolute;
-    left: calc(50% + 40px);
+    justify-self: start;
     font-size: 15px;
     font-weight: 700;
     padding: 4px 14px;
@@ -137,7 +128,6 @@
     width: 100px;
     text-align: center;
     box-sizing: border-box;
-    white-space: nowrap;
   }
   .kill-bar-status.on { background: var(--green); color: #000; }
   .kill-bar-status.off { background: var(--red); color: white; }

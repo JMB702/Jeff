@@ -36,13 +36,21 @@ def get_file_hash():
         return None
 
 
+BRANCH = 'claude/tinder-messaging-bot-sX6om'
+
+
 def git_pull_loop():
-    """Pull from git every 5 seconds in the background."""
+    """Pull from the feature branch every 5 seconds."""
+    # Make sure we're on the right branch first
+    subprocess.run(
+        ['git', 'checkout', BRANCH],
+        cwd=SCRIPT_DIR, capture_output=True, text=True, timeout=15
+    )
     while True:
         time.sleep(5)
         try:
             result = subprocess.run(
-                ['git', 'pull'],
+                ['git', 'pull', 'origin', BRANCH],
                 cwd=SCRIPT_DIR,
                 capture_output=True,
                 text=True,
