@@ -208,15 +208,9 @@
 
   .match-list-wrap {
     flex: 1;
-    position: relative;
-    min-height: 0;
+    overflow: hidden;
   }
   .match-list {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: auto;
@@ -1092,6 +1086,18 @@ async function init() {
   connectSSE();
 }
 init();
+
+// --- Fix match list height (bypass flex chain issues) ---
+function fixMatchListHeight() {
+  var wrap = document.querySelector('.match-list-wrap');
+  var list = document.getElementById('match-list');
+  if (wrap && list) {
+    var rect = wrap.getBoundingClientRect();
+    list.style.height = rect.height + 'px';
+  }
+}
+fixMatchListHeight();
+window.addEventListener('resize', fixMatchListHeight);
 
 // --- Live reload (auto-refreshes browser when dev.py detects file changes) ---
 (function() {
