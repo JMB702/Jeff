@@ -207,8 +207,6 @@
   .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
   .match-list-wrap {
-    flex: 1 1 0px;
-    min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: auto;
@@ -1085,7 +1083,21 @@ async function init() {
   }
   connectSSE();
 }
-init();
+init().then(function() {
+  requestAnimationFrame(fixSidebarScroll);
+});
+
+// --- Fix sidebar scroll: measure exact pixel space available ---
+function fixSidebarScroll() {
+  var wrap = document.querySelector('.match-list-wrap');
+  if (!wrap) return;
+  var top = wrap.getBoundingClientRect().top;
+  var available = window.innerHeight - top;
+  if (available > 0) {
+    wrap.style.height = available + 'px';
+  }
+}
+window.addEventListener('resize', fixSidebarScroll);
 
 // --- Live reload (auto-refreshes browser when dev.py detects file changes) ---
 (function() {
