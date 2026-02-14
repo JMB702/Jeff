@@ -318,33 +318,9 @@
   .detail-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
   .detail-actions {
     display: flex;
-    gap: 8px;
-  }
-  .auto-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 24px;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-  }
-  .auto-bar-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-dim);
-  }
-  .auto-bar-right {
-    display: flex;
     align-items: center;
     gap: 10px;
   }
-  .auto-bar-status {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-  .auto-bar-status.on { color: var(--green); }
-  .auto-bar-status.off { color: var(--red); }
 
   /* Buttons */
   .btn {
@@ -752,16 +728,7 @@ function renderDetail(match, conversation) {
         </div>
       </div>
       <div class="detail-actions">
-        ${isStopped
-          ? `<button class="btn btn-success" onclick="handleResume('${match.match_id}')">Resume Bot</button>`
-          : `<button class="btn btn-ghost" onclick="handleStop('${match.match_id}')">Stop Bot</button>`
-        }
-      </div>
-    </div>
-    <div class="auto-bar">
-      <span class="auto-bar-label">Auto-Messaging</span>
-      <div class="auto-bar-right">
-        <span class="auto-bar-status ${match.auto_messaging ? 'on' : 'off'}">${match.auto_messaging ? 'ON' : 'OFF'}</span>
+        <span style="font-size:13px;color:var(--text-dim);font-weight:600;">Auto-Messaging</span>
         <div class="toggle ${match.auto_messaging ? 'active' : ''}" onclick="handleAutoToggle('${match.match_id}')">
           <span class="toggle-slider"></span>
         </div>
