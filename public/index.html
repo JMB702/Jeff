@@ -179,11 +179,9 @@
   .sidebar {
     width: 320px;
     border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
     background: var(--surface);
-    min-height: 0;
-    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .sidebar-filter {
     padding: 12px 16px;
@@ -191,7 +189,10 @@
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
-    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 1;
   }
   .filter-btn {
     background: var(--surface2);
@@ -207,9 +208,6 @@
   .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
   .match-list-wrap {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: auto;
   }
   .match-list {
   }
@@ -1083,21 +1081,7 @@ async function init() {
   }
   connectSSE();
 }
-init().then(function() {
-  requestAnimationFrame(fixSidebarScroll);
-});
-
-// --- Fix sidebar scroll: measure exact pixel space available ---
-function fixSidebarScroll() {
-  var wrap = document.querySelector('.match-list-wrap');
-  if (!wrap) return;
-  var top = wrap.getBoundingClientRect().top;
-  var available = window.innerHeight - top;
-  if (available > 0) {
-    wrap.style.height = available + 'px';
-  }
-}
-window.addEventListener('resize', fixSidebarScroll);
+init();
 
 // --- Live reload (auto-refreshes browser when dev.py detects file changes) ---
 (function() {
