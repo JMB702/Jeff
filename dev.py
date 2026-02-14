@@ -66,7 +66,7 @@ DEMO_MATCHES = [
     },
     {
         "match_id": "m_rachel_04", "name": "Rachel", "status": "date_confirmed",
-        "messages_sent": 18, "messages_received": 15, "followups_sent": 0, "auto_messaging": False,
+        "messages_sent": 18, "messages_received": 15, "followups_sent": 0, "auto_messaging": True,
         "profile_summary": "26, software engineer at a startup. Board game nerd, rock climber, makes her own pasta. Witty and direct. Already confirmed she's excited for the date.",
         "date_details": "Thursday 7pm, Avanti Food Hall",
         "created_at": (now - timedelta(days=6)).isoformat(),
@@ -84,7 +84,7 @@ DEMO_MATCHES = [
     },
     {
         "match_id": "m_sarah_06", "name": "Sarah", "status": "ghosted",
-        "messages_sent": 4, "messages_received": 2, "followups_sent": 2, "auto_messaging": False,
+        "messages_sent": 4, "messages_received": 2, "followups_sent": 2, "auto_messaging": True,
         "profile_summary": "28, works in marketing. Loves yoga, brunch, and her two cats. Bio is minimal — 'just here to see what happens.' Stopped responding after day 2.",
         "date_details": None,
         "created_at": (now - timedelta(days=5)).isoformat(),
@@ -111,7 +111,7 @@ DEMO_MATCHES = [
     },
     {
         "match_id": "m_nicole_09", "name": "Nicole", "status": "stopped",
-        "messages_sent": 3, "messages_received": 1, "followups_sent": 1, "auto_messaging": False,
+        "messages_sent": 3, "messages_received": 1, "followups_sent": 1, "auto_messaging": True,
         "profile_summary": "29, real estate agent. Gym selfies, boat photos, travel pics. Bio: 'fluent in sarcasm.' Short responses, low engagement.",
         "date_details": None,
         "created_at": (now - timedelta(days=4)).isoformat(),
@@ -156,7 +156,7 @@ DEMO_MATCHES = [
     },
     {
         "match_id": "m_madison_14", "name": "Madison", "status": "ghosted",
-        "messages_sent": 6, "messages_received": 3, "followups_sent": 2, "auto_messaging": False,
+        "messages_sent": 6, "messages_received": 3, "followups_sent": 2, "auto_messaging": True,
         "profile_summary": "25, flight attendant. Travel photos everywhere — Bali, Paris, Tokyo. Bio: 'probably on a plane rn.' Hard to pin down, sporadic replies before going silent.",
         "date_details": None,
         "created_at": (now - timedelta(days=7)).isoformat(),
@@ -174,7 +174,7 @@ DEMO_MATCHES = [
     },
     {
         "match_id": "m_chloe_16", "name": "Chloe", "status": "date_confirmed",
-        "messages_sent": 20, "messages_received": 18, "followups_sent": 0, "auto_messaging": False,
+        "messages_sent": 20, "messages_received": 18, "followups_sent": 0, "auto_messaging": True,
         "profile_summary": "28, ER doctor. Surprisingly chill despite the job. Into wine tasting, mystery novels, and her two rescue cats. Very direct, appreciates honesty. Excited about the date.",
         "date_details": "Friday 7:30pm, Barcelona Wine Bar",
         "created_at": (now - timedelta(days=8)).isoformat(),
@@ -210,7 +210,7 @@ DEMO_MATCHES = [
     },
     {
         "match_id": "m_vanessa_20", "name": "Vanessa", "status": "unmatched",
-        "messages_sent": 2, "messages_received": 1, "followups_sent": 0, "auto_messaging": False,
+        "messages_sent": 2, "messages_received": 1, "followups_sent": 0, "auto_messaging": True,
         "profile_summary": "30, lawyer. Professional headshot as first photo. Bio: 'looking for something real.' Unmatched after bot's second message — may have been too forward.",
         "date_details": None,
         "created_at": (now - timedelta(days=3)).isoformat(),

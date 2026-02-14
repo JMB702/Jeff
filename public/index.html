@@ -572,6 +572,42 @@ let allMatches = [];
 let currentFilter = 'all';
 let isKilled = false;
 
+// --- localStorage persistence for auto-messaging ---
+function loadAutoStates() {
+  try {
+    const saved = localStorage.getItem('autoMessagingStates');
+    return saved ? JSON.parse(saved) : {};
+  } catch(e) { return {}; }
+}
+function saveAutoState(matchId, value) {
+  try {
+    const states = loadAutoStates();
+    states[matchId] = value;
+    localStorage.setItem('autoMessagingStates', JSON.stringify(states));
+  } catch(e) {}
+}
+function applyAutoStates(matches) {
+  const states = loadAutoStates();
+  matches.forEach(function(m) {
+    if (states.hasOwnProperty(m.match_id)) {
+      m.auto_messaging = states[m.match_id];
+    }
+  });
+}
+
+// --- localStorage persistence for kill switch ---
+function loadKillState() {
+  try {
+    const saved = localStorage.getItem('killSwitchState');
+    return saved !== null ? JSON.parse(saved) : null;
+  } catch(e) { return null; }
+}
+function saveKillState(killed) {
+  try {
+    localStorage.setItem('killSwitchState', JSON.stringify(killed));
+  } catch(e) {}
+}
+
 // --- Data fetching (with graceful fallbacks for file:// mode) ---
 async function fetchStats() {
   try {
@@ -827,18 +863,31 @@ async function selectMatch(matchId) {
   currentMatchId = matchId;
   currentTab = 'conversation';
   const data = await fetchConversation(matchId);
+  // Apply locally-persisted auto_messaging state
+  const local = allMatches.find(x => x.match_id === matchId);
+  if (local && data.match) data.match.auto_messaging = local.auto_messaging;
   renderMatchList(allMatches);
   renderDetail(data.match, data.conversation);
 }
 
 function switchTab(tab) {
   currentTab = tab;
-  if (currentMatchId) selectMatch(currentMatchId);
+  if (currentMatchId) {
+    // Re-render without resetting tab to 'conversation'
+    fetchConversation(currentMatchId).then(function(data) {
+      const local = allMatches.find(x => x.match_id === currentMatchId);
+      if (local && data.match) data.match.auto_messaging = local.auto_messaging;
+      renderDetail(data.match, data.conversation);
+    });
+  }
 }
 
 async function handleAutoToggle(matchId) {
   const m = allMatches.find(x => x.match_id === matchId);
   if (m) m.auto_messaging = !m.auto_messaging;
+  // Persist to localStorage so it survives refresh
+  if (m) saveAutoState(matchId, m.auto_messaging);
+  // Fire API call in background (server also updates its state)
   toggleAutoMessaging(matchId).catch(function(){});
   if (currentMatchId === matchId) {
     const data = await fetchConversation(matchId);
@@ -876,15 +925,18 @@ async function handleKillSwitch() {
   const nowKilled = !isKilled;
   if (isFileMode) {
     updateKillUI(nowKilled);
+    saveKillState(nowKilled);
     return;
   }
   try {
     const res = await fetch(`${API}/api/bot/kill`, { method: 'POST' });
     const data = await res.json();
     updateKillUI(data.killed);
+    saveKillState(data.killed);
     if (data.killed) await refresh();
   } catch(e) {
     updateKillUI(nowKilled);
+    saveKillState(nowKilled);
   }
 }
 
@@ -937,6 +989,7 @@ function esc(str) {
 
 async function refresh() {
   const [stats, matches] = await Promise.all([fetchStats(), fetchMatches()]);
+  applyAutoStates(matches);
   allMatches = matches;
   renderStats(stats);
   renderMatchList(matches);
@@ -970,14 +1023,22 @@ async function init() {
   if (isFileMode) {
     renderStats({ total: 0, messages_sent_total: 0, dates_confirmed: 0 });
     renderMatchList([]);
+    // Restore kill switch from localStorage
+    const savedKill = loadKillState();
+    if (savedKill !== null) updateKillUI(savedKill);
     return;
   }
   await refresh();
+  // Check server kill state first, fall back to localStorage
   try {
     const statusRes = await fetch(`${API}/api/bot/status`);
     const statusData = await statusRes.json();
-    if (statusData.killed) updateKillUI(true);
-  } catch(e) {}
+    updateKillUI(statusData.killed);
+    saveKillState(statusData.killed);
+  } catch(e) {
+    const savedKill = loadKillState();
+    if (savedKill !== null) updateKillUI(savedKill);
+  }
   connectSSE();
 }
 init();
