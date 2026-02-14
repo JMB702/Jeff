@@ -837,10 +837,14 @@ function switchTab(tab) {
 }
 
 async function handleAutoToggle(matchId) {
-  await toggleAutoMessaging(matchId);
-  const m = allMatches.find(m => m.match_id === matchId);
-  if (m) m.auto_messaging = !m.auto_messaging;
-  if (currentMatchId === matchId) selectMatch(matchId);
+  const result = await toggleAutoMessaging(matchId);
+  const m = allMatches.find(x => x.match_id === matchId);
+  if (m) m.auto_messaging = result.auto_messaging;
+  if (currentMatchId === matchId) {
+    const data = await fetchConversation(matchId);
+    renderMatchList(allMatches);
+    renderDetail(data.match, data.conversation);
+  }
 }
 
 async function handleSend() {
