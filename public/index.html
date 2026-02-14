@@ -398,8 +398,6 @@
     min-height: 0;
   }
   .convo-inner {
-    min-height: 100%;
-    padding-top: 60px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -833,10 +831,17 @@ function renderTab(match, conversation) {
       </div>
     `;
 
-    // Scroll to bottom — wait for layout to finish
+    // Ensure enough content for rubber banding, then scroll to bottom
     requestAnimationFrame(function() {
       const scroll = document.getElementById('convo-scroll');
-      if (scroll) scroll.scrollTop = scroll.scrollHeight;
+      if (!scroll) return;
+      const inner = scroll.querySelector('.convo-inner');
+      if (inner) {
+        // Always ensure at least 80px of overflow for rubber banding
+        var need = scroll.clientHeight - inner.scrollHeight + 80;
+        inner.style.paddingTop = (need > 0 ? need : 0) + 'px';
+      }
+      scroll.scrollTop = scroll.scrollHeight;
     });
 
   } else if (currentTab === 'profile') {
